@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEVN To Do</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js" integrity="sha512-JSCFHhKDilTRRXe9ak/FJ28dcpOJxzQaCd3Xg8MyF6XFjODhy/YMCM8HW0TFDckNHWUewW+kfvhin43hKtJxAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+  <link rel="stylesheet" href="/ui/todo/style.css">
+  <script type="module">
+    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+      const API_URL="http://localhost:5038/";
+    createApp({
+      data() {  
+        return {
+          title:"To do App",
+          notes:[]
+        }
+      },methods:{
+          async refreshData(){
+              axios.get(API_URL+"mevn/tododb/GetNotes").then(
+                  (response)=>{
+                      this.notes=response.data;
+                  }
+              )
+          },
+          async addNewNotes(){
+            var newNotes=document.getElementById("newNotes").value;
+            const formData= new FormData();
+            formData.append("newNotes",newNotes);
+
+            axios.post(API_URL+"mevn/tododb/AddNotes",formData).then(
+              (response)=>{
+                this.refreshData();
+                alert(response.data);
+              }
+            )
+          },
+          async deleteNotes(id){
+            axios.delete(API_URL+"mevn/tododb/DeleteNotes?id="+id).then(
+                (response)=>{
+                this.refreshData();
+                alert(response.data);
+              }
+            )
+          }
+      },mounted:function(){
+          this.refreshData();
+      }
+    }).mount('#mevn')
+  </script>
+
+</head>
+<body>
+  <div">
+    <div id="mevn" class="border h-screen border-black bg-gray-500 grid place-content-center">
+      <div class="border border-black rounded-lg p-4 text-white bg-gray-700">
+        <div>
+          <h2>To Do App</h2>
+          <input class="rounded-md px-1 py-2 text-black" id="newNotes"/>&nbsp;
+          <button @click="addNewNotes()" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Note</button>
+        </div>
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left rtl:text-right  ">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th class="text-center px-6 py-3 text-white" scope="col">Description</th>
+                <th class="text-center px-6 py-3 text-white" scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tr v-for="note in notes">
+              <td class="max-w-[100px] max-h-[20px] overflow-hidden whitespace-nowrap text-ellipsis text-white">{{note.description}}</td>
+              <td class="grid place-content-center ">
+                <button @click="deleteNotes(note.id)" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-2 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                  <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" width="12px" height="12px" class="delete"><path fill="#ffffff" d="M 10.806641 2 C 10.289641 2 9.7956875 2.2043125 9.4296875 2.5703125 L 9 3 L 4 3 A 1.0001 1.0001 0 1 0 4 5 L 20 5 A 1.0001 1.0001 0 1 0 20 3 L 15 3 L 14.570312 2.5703125 C 14.205312 2.2043125 13.710359 2 13.193359 2 L 10.806641 2 z M 4.3652344 7 L 5.8925781 20.263672 C 6.0245781 21.253672 6.877 22 7.875 22 L 16.123047 22 C 17.121047 22 17.974422 21.254859 18.107422 20.255859 L 19.634766 7 L 4.3652344 7 z"/></svg>
+                </button>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
